@@ -2,11 +2,13 @@
 // Created by luke on 4/14/22.
 //
 
-#ifndef INC_5_LETTER_WORDLE_LINKED_LIST_H
-#define INC_5_LETTER_WORDLE_LINKED_LIST_H
+#ifndef WORDLE_LINKED_LIST_H
+#define WORDLE_LINKED_LIST_H
 
 #include <string>
 #include <iostream>
+
+int LETTERS = 5;
 
 
 class ll_node {
@@ -142,14 +144,14 @@ ll_node* llist::remove(ll_node* d) {
         return this->head;
     }
     d->prev()->setnext(d->next());
-    if (d->next() != nullptr) {  // case for deleting tail
+    if (d->next() != nullptr) {  // case for deleting in middle of list
         d->next()->setprev(d->prev());
-        retval = d->next();
+        retval = d->prev();
         delete(d);
         this->size--;
         return retval;
     }
-    else {  // case for deleting in middle of list
+    else {  // case for deleting tail
         this->tail = d->prev();
         delete(d);
         this->size--;
@@ -194,5 +196,85 @@ ll_node* llist::linsearch(std::string* needle, ll_node* haystack) {
         return nullptr;
     }
 }
+void llist::exclude_letters(std::string input) {   // this is horrifically slow, unsure how to speed it up but it works I guess...
+    ll_node* ptr = this->head;
+    bool goToNextWord;
+    int letter = 1;
+nextCharInInput: for (int i = 1; i < input.length(); i++) {      // for each letter in input
+        ptr = this->head;
+        while (ptr != nullptr) {                                 // loop through every word in search list
+            for (int letter = 0; letter < LETTERS; letter++) {   // for each letter in word
+                if (ptr->data[letter] == input[i]) {             // if it matches the character from input
+                    ptr = this->remove(ptr);                     // remove that word from search list
+                    if (ptr == nullptr)
+                        goto nextCharInInput;
+                    break;
+                }
+            }
+            ptr = ptr->next();
+        }
+    }
+}
+void llist::include(char c, int pos) {
+    exclude(c, pos);   // cannot be in position, otherwise would be correct
+    ll_node* ptr = this->head;
+    bool has_c;
+    while (ptr != nullptr) {
+        has_c = false;
+        for (int i = 0; i < LETTERS && !has_c; i++) {
+            if (ptr->data[i] == c) {
+                has_c = true;
+                break;
+            }
+        }
+        if (!has_c) {
+            ptr = this->remove(ptr);
+            if (ptr == nullptr)
+                break;
+        }
+        ptr = ptr->next();
+    }
+    return;
+}
+void llist::include_correct(char c, int pos) {
+    ll_node* ptr = this->head;
+    while (ptr != nullptr) {
+        if (ptr->data[pos] != c) {
+            ptr = this->remove(ptr);
+            if (ptr == nullptr)
+                break;
+        }
+        ptr = ptr->next();
+    }
+}
+void llist::exclude(char c, int pos) {
+    ll_node* ptr = this->head;
+    while (ptr != nullptr) {
+        if (ptr->data[pos] == c) {
+            ptr = this->remove(ptr);
+            if (ptr == nullptr)
+                break;
+        }
+        ptr = ptr->next();
+    }
+    return;
+}
+void llist::filter(std::string input) {
+    // loop to determine if any correct value & position (those narrow list faster than value only)
+    for (int i = 0; i < LETTERS; i++) {
+        if (input[i] == '_' || input[i] < (char)65)
+            continue;
+        else if (input[i] == toupper(input[i])) {
+            this->include_correct(tolower(input[i]), i);   // use tolower because dictionary is all in lowercase
+            input[i] = '_';
+        }
+    }
+    for (int i = 0; i < LETTERS; i++) {
+        if (input[i] == '_' || input[i] < (char)65)
+            continue;
+        else
+            this->include(input[i], i);
+    }
+}
 
-#endif //INC_5_LETTER_WORDLE_LINKED_LIST_H
+#endif //WORDLE_LINKED_LIST_H
