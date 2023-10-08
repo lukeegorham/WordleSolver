@@ -29,6 +29,8 @@ Enter a search string or one of the options below:
 This menu will accept multiple inputs. The single-character options listed are not case-sensitive. Enter a search string that matches the criteria below (also accessed by entering `h` or `H` in the main menu.
 
 ```?
+HELP WITH CREATING SEARCH STRINGS:
+
 	__s_D   :  lowercase letters are correct but wrong place, uppercase are correct and in correct place
 	.itna   :  a period before letters will exclude words containing those letters
 	#posed  :  guess if a word meets current criteria (displays success/failure)
@@ -40,7 +42,9 @@ This menu will accept multiple inputs. The single-character options listed are n
 
 ### Example Use Case:
 [Example 1](Documentation/Example1.md)
+
 [Example 2](Documentation/Example2.md)
+
 [Example 3](Documentation/Example3.md)
 
 ### Disclaimer:
