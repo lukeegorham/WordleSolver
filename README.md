@@ -36,11 +36,18 @@ HELP WITH CREATING SEARCH STRINGS:
 	#posed  :  guess if a word meets current criteria (displays success/failure)
 ```
 **IMPORTANT:** 
-* Using search strings **is** case-sensitive to deliniate correct vs incorrect placement.
 * Use underscores `_` for blank spaces
-* Users cannot combine types of search strings but must enter them separately. For example, a user cannot use `.itna#posed` or `__s_D.itna` or `__s_D#posed` as valid search strings.
+* Using search strings **is** case-sensitive to deliniate correct vs incorrect placement:
+	* `stR__` will include an **R** in position 3, and include the letters **s** and **t** but not in positions 1 and 2, respectively
+ 	* `___iP` includes **P** in position 5, and includes **i** in any position but 4 (and 5 by nature of the **P**)
+	* `S___p` keeps the **S** in position 1, and includes a **p** in any position but 1 and 5 
+* Users cannot combine types of search strings but must enter them separately:
+	* `stR.a.p`
+ 	* `__s_D#strum`
+  	* `STRU.t`
+  	* These are all invalid search strings
 
-### Example Use Case:
+### Example Use Cases (With Pictures):
 [Example 1](Documentation/Example1.md)
 
 [Example 2](Documentation/Example2.md)
