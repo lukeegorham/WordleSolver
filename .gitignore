@@ -27,7 +27,7 @@
 *.lib
 
 # Executables
-*.exe
+#* .exe
 *.out
 *.app
 
@@ -130,6 +130,8 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+*.vcxproj
+*.vcxproj.filters
 
 # Chutzpah Test files
 _Chutzpah*
@@ -435,3 +437,8 @@ FodyWeavers.xsd
 cmake-build-debug/
 out/
 CMakeLists.txt
+WordleSolver.vcxproj
+*.vcxproj
+*.filters
+
+

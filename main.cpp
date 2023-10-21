@@ -2,8 +2,8 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-
 #include "linked_list.h"
+
 
 // Functions
 bool read_in_sorted_words(llist* words){
@@ -11,7 +11,7 @@ bool read_in_sorted_words(llist* words){
     words->init();
     std::ifstream file;
     std::stringstream filename;
-    filename << "Dictionaries/" << LETTERS << ".txt";
+    filename << "Dictionaries/" << WORD_SIZE << ".txt";
     file.open(filename.str());
     if (!file.is_open()) {
         std::cout << "Working directory:\n";
@@ -39,7 +39,7 @@ bool read_in_unsorted_words(llist* words) {
 }
 void setYear(llist* search_list) {
     std::cout << "How many letters are you playing with?  : ";
-    std::cin >> LETTERS; std::cin.clear(); std::cin.ignore();
+    std::cin >> WORD_SIZE; std::cin.clear(); std::cin.ignore();
     if (!read_in_sorted_words(search_list)) {
         std::cout << "Reading dictionary file failed!\nExiting..." << std::endl;
         exit(1);
@@ -84,7 +84,8 @@ int main() {
                     std::getline(std::cin, input);
                     break;
                 case 'S':
-                    std::cout << "\nSize of searchable list  : " << search_list.size << " words\n";
+                    //std::cout << "\nSize of searchable list  : " << search_list.size << " words\n";
+                    search_list.info();
                     std::cout << "\nPress enter to continue...";
                     std::getline(std::cin, input);
                     break;
@@ -111,7 +112,7 @@ int main() {
         }
         else if (input.length() == 6 && input[0] == '#') {
             std::string guess = "     ";
-            for (int i = 0; i < LETTERS && i < input.length(); i++)
+            for (int i = 0; i < WORD_SIZE && i < input.length(); i++)
                 guess.at(i) = input.at(i+1);   // remove first character (#) from string then search
             if (search_list.search(&guess) != nullptr)
                 std::cout << "SUCCESS: " << input << " found in search list!\n";
