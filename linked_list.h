@@ -36,22 +36,18 @@ public:
     ll_node* prev();
     void setprev(ll_node*);
 };
-
 ll_node* ll_node::prev() {
     return this->p;
 }
 void ll_node::setprev(ll_node* prev) {
     this->p = prev;
 }
-
 ll_node* ll_node::next() {
     return this->n;
 }
-
 void ll_node::setnext(ll_node* next) {
     this->n = next;
 }
-
 void delete_nodes(ll_node* n) {
     if (n == nullptr)
         return;
@@ -87,7 +83,7 @@ public:
     void print() const;
     void printhistory() const;
     void filter_results(std::string);
-    void filter(std::string);
+    void parse(std::string);
     void include(std::string*, int);
     void include(char, int);
     void include_correct(char, int);
@@ -98,13 +94,11 @@ public:
     void rm_duplicates();
     void info();
 };
-
 void llist::init() {
     this->head = nullptr;
     this->tail = nullptr;
     this->size = 0;
 }
-
 void llist::append(std::string* s) {
     auto* n = new ll_node;
     if(this->head == nullptr) {
@@ -120,7 +114,6 @@ void llist::append(std::string* s) {
     n->data = *s;
     this->size++;
 }
-
 void llist::remove_head() {
     ll_node* ptr = this->head;
     if (this->head == nullptr)
@@ -133,7 +126,6 @@ void llist::remove_head() {
     delete(ptr);
     this->size--;
 }
-
 void llist::insert(std::string* str) {
     ll_node* ptr = this->head;
     if (this->head == nullptr) {
@@ -171,7 +163,6 @@ void llist::insert(std::string* str) {
         }
     }
 }
-
 ll_node* llist::remove(ll_node* d) {
     ll_node* retval;
     if(d == this->head) {  // case for deleting head
@@ -193,7 +184,6 @@ ll_node* llist::remove(ll_node* d) {
         return nullptr;
     }
 }
-
 void llist::position_exclude(std::string* s) {
     ll_node* ptr;
     std::string str_to_pass = "";
@@ -219,11 +209,9 @@ void llist::position_exclude(std::string* s) {
         }
     }
 }
-
 void llist::destroy() {
     delete_nodes(this->head);
 }
-
 void llist::print() const {
     ll_node* ptr = this->head;
     std::cout << "WORDS IN LIST [" << this->size << "]:\n";
@@ -233,7 +221,6 @@ void llist::print() const {
     }
     std::cout << "Total Size: " << this->size << std::endl;
 }
-
 void llist::printhistory() const {
     ll_node* ptr = this->head;
     std::cout << "Filter History:\n";
@@ -243,25 +230,22 @@ void llist::printhistory() const {
     }
     std::cout << "End of History.\n";
 }
-
-void llist::filter(std::string input) {
+void llist::parse(std::string input) {
+    char c;
     // loop to determine if any correct value & position (those narrow list faster than value only)
     for (int i = 0; i < WORD_SIZE; i++) {
-        if (input[i] == '_' || input[i] < (char)65)
+        c = input[i];
+        if (c == '_') {
             continue;
-        else if (input[i] == toupper(input[i])) {
-            this->include_correct(tolower(input[i]), i);   // use tolower because dictionary is all in lowercase
-            input[i] = '_';
+        }
+        else if (c > 96 && c < 123) {
+            this->include(input[i], i);
+        }
+        else if (c > 64 && c < 91) {
+            this->include_correct(input[i]+32, i);   // use tolower because dictionary is all in lowercase
         }
     }
-    for (int i = 0; i < WORD_SIZE; i++) {
-        if (input[i] == '_' || input[i] < (char)65)
-            continue;
-        else
-            this->include(input[i], i);
-    }
 }
-
 void llist::include_correct(char c, int pos) {
     ll_node* ptr = this->head;
     while (ptr != nullptr) {
@@ -269,33 +253,34 @@ void llist::include_correct(char c, int pos) {
             ptr = this->remove(ptr);
             if (ptr == nullptr)
                 break;
+            continue;
         }
         ptr = ptr->next();
     }
 }
-
 void llist::include(char c, int pos) {
     exclude(c, pos);   // cannot be in position, otherwise would be correct
     ll_node* ptr = this->head;
     bool has_c;
-    while (ptr != nullptr) {
+    include_loop: while (ptr != nullptr) {
         has_c = false;
         for (int i = 0; i < WORD_SIZE && !has_c; i++) {
             if (ptr->data[i] == c) {
                 has_c = true;
                 break;
             }
+            continue;
         }
         if (!has_c) {
             ptr = this->remove(ptr);
             if (ptr == nullptr)
                 break;
+            goto include_loop;
         }
         ptr = ptr->next();
     }
     return;
 }
-
 void llist::exclude(char c, int pos) {
     ll_node* ptr = this->head;
     while (ptr != nullptr) {
@@ -303,12 +288,12 @@ void llist::exclude(char c, int pos) {
             ptr = this->remove(ptr);
             if (ptr == nullptr)
                 break;
+            continue;
         }
         ptr = ptr->next();
     }
     return;
 }
-
 void llist::filter_results(std::string input) {
     ll_node* ptr = this->head;
     for(int i=0; i<WORD_SIZE; i++) {
@@ -325,7 +310,6 @@ void llist::filter_results(std::string input) {
         }
     }
 }
-
 llist* llist::first_filter_results(std::string input) const {
     auto* s = new llist;
     ll_node* ptr = this->head;
@@ -341,7 +325,6 @@ llist* llist::first_filter_results(std::string input) const {
     }
     return s;
 }
-
 ll_node* llist::search(std::string* str) const {
     /**
      * Note: this function can be used for implementing different
@@ -352,7 +335,6 @@ ll_node* llist::search(std::string* str) const {
      */
     return llist::linsearch(str, this->head);
 }
-
 ll_node* llist::linsearch(std::string* needle, ll_node* haystack) {
     if ((*needle).empty() || haystack == nullptr) {
         return nullptr;
@@ -368,7 +350,6 @@ ll_node* llist::linsearch(std::string* needle, ll_node* haystack) {
         return nullptr;
     }
 }
-
 void llist::exclude(std::string* s) {
     ll_node* ptr = this->head;
     for(int c=1; c < WORD_SIZE+1; c++) {
@@ -384,28 +365,48 @@ void llist::exclude(std::string* s) {
         }
     }
 }
-
-void llist::exclude_letters(std::string input) {   // this is horrifically slow, unsure how to speed it up but it works I guess...
-    ll_node* ptr = this->head;
-    bool goToNextWord;
-    int letter = 1;
-nextCharInInput: 
-    for (int i = 1; i < input.length(); i++) {   // for each letter in input
+//void llist::exclude_letters(std::string input) {   // this is horrifically slow, unsure how to speed it up but it works I guess...
+//    ll_node* ptr = this->head;
+//    bool goToNextWord;
+//    int letter = 1;
+//nextCharInInput: 
+//    for (int i = 1; i < input.length(); i++) {   // for each letter in input
+//        ptr = this->head;
+//        while (ptr != nullptr) {                                    // loop through every word in search list
+//            for (int letter = 0; letter < WORD_SIZE; letter++) {    // for each letter in word
+//                if (ptr->data[letter] == input[i]) {                // if it matches the character from input
+//                    ptr = this->remove(ptr);                        // remove that word from search list
+//                    if (ptr == nullptr)   // reach end of llist
+//                        goto nextCharInInput;
+//                    break;
+//                }
+//            }
+//            ptr = ptr->next();
+//        }
+//    }
+//}
+void llist::exclude_letters(std::string s) {
+    ll_node* ptr;
+    bool removed = false;
+    for (int c = 1; c < s.length(); c++) {
         ptr = this->head;
-        while (ptr != nullptr) {                                    // loop through every word in search list
-            for (int letter = 0; letter < WORD_SIZE; letter++) {    // for each letter in word
-                if (ptr->data[letter] == input[i]) {                // if it matches the character from input
-                    ptr = this->remove(ptr);                        // remove that word from search list
-                    if (ptr == nullptr)
-                        goto nextCharInInput;
+        while (ptr != nullptr) {
+            for (int l = 0; l < WORD_SIZE; l++) {
+                if (s[c] == ptr->data[l]) {
+                    ptr = this->remove(ptr);
+                    removed = true;
                     break;
                 }
             }
-            ptr = ptr->next();
+            if (removed) {
+                removed = false;
+            }
+            else {
+                ptr = ptr->next();
+            }
         }
     }
 }
-
 void llist::include(std::string* s, int length) {
     ll_node* ptr;
     for(int c=0; c < length; c++) {
@@ -421,7 +422,6 @@ void llist::include(std::string* s, int length) {
         }
     }
 }
-
 void llist::rm_duplicates() {
     ll_node* ptr = this->head;
 
@@ -446,7 +446,6 @@ void llist::rm_duplicates() {
         ptr = ptr->next();
     }
 }
-
 void llist::info() {
     ll_node* ptr = this->head;
 

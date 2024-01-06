@@ -108,7 +108,7 @@ int main() {
             }
         }
         else if (input.length() == 5 && input[0] != '.') {
-            search_list.filter(input);
+            search_list.parse(input);
         }
         else if (input.length() == 6 && input[0] == '#') {
             std::string guess = "     ";
