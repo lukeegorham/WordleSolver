@@ -2,56 +2,15 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-#include "linked_list.h"
+#include "wordle_ll.h"
 
-
-// Functions
-bool read_in_sorted_words(llist* words){
-    std::string str;
-    words->init();
-    std::ifstream file;
-    std::stringstream filename;
-    filename << "Dictionaries/" << WORD_SIZE << ".txt";
-    file.open(filename.str());
-    if (!file.is_open()) {
-        std::cout << "Working directory:\n";
-        system("echo %cd%");
-        std::cout << "\nFilename: " << filename.str() << std::endl;
-        return false;
-    }
-    while (getline(file, str))  {
-        words->append(&str);
-    }
-    return true;
-}
-bool read_in_unsorted_words(llist* words) {
-    std::string str;
-    words->init();
-    std::ifstream file;
-    file.open("words.txt");
-    if (!file.is_open()) {
-        return false;
-    }
-    while (getline(file, str))  {
-        words->insert(&str);
-    }
-    return true;
-}
-void setYear(llist* search_list) {
-    std::cout << "How many letters are you playing with?  : ";
-    std::cin >> WORD_SIZE; std::cin.clear(); std::cin.ignore();
-    if (!read_in_sorted_words(search_list)) {
-        std::cout << "Reading dictionary file failed!\nExiting..." << std::endl;
-        exit(1);
-    }
-}
 
 int main() {
-    llist search_list;
+    wordle_ll search_list;
     std::string input;
     bool loop = true;
+
     search_list.init();
-    setYear(&search_list);
     while(loop) {
         system("CLS");
         std::cout << "WORDLE SOLVER:\n";
@@ -84,17 +43,16 @@ int main() {
                     std::getline(std::cin, input);
                     break;
                 case 'S':
-                    //std::cout << "\nSize of searchable list  : " << search_list.size << " words\n";
                     search_list.info();
                     std::cout << "\nPress enter to continue...";
                     std::getline(std::cin, input);
                     break;
                 case 'N':
-                    setYear(&search_list);
+                    search_list.setYear();
                     break;
                 case 'C':
                     search_list.destroy();
-                    if (!read_in_sorted_words(&search_list)) {
+                    if (!search_list.read_in_sorted_words()) {
                         std::cout << "Reading dictionary file failed!\nExiting..." << std::endl;
                         std::cout << "\nPress enter to continue...";
                         std::getline(std::cin, input);
@@ -112,7 +70,7 @@ int main() {
         }
         else if (input.length() == 6 && input[0] == '#') {
             std::string guess = "     ";
-            for (int i = 0; i < WORD_SIZE && i < input.length(); i++)
+            for (int i = 0; i < search_list.WORD_SIZE && i < input.length(); i++)
                 guess.at(i) = input.at(i+1);   // remove first character (#) from string then search
             if (search_list.search(&guess) != nullptr)
                 std::cout << "SUCCESS: " << input << " found in search list!\n";

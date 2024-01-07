@@ -4,58 +4,37 @@
  * Date    :  21 May 2022
  */
 
-#ifndef INC_5_LETTER_WORDLE_LINKED_LIST_H
-#define INC_5_LETTER_WORDLE_LINKED_LIST_H
+#ifndef INC_WORDLE_LINKED_LIST_H
+#define INC_WORDLE_LINKED_LIST_H
 
 #include <string>
 #include <iostream>
 #include <iomanip>
 #include "simple_stack.hpp"
 
-//#define WORD_SIZE 5
-int WORD_SIZE = 5;
 #define ALPHABET_SIZE 26
-#define MAX_SIZE 100000000
 
 
 /**
- * @brief Node for linked list 'llist'. Each node stores next and prev nodes
+ * @brief Node for linked list 'wordle_ll'. Each node stores next and prev nodes
  * along with data (which is a std::string. Note that next (n) and prev (p)
- * members are private and must be set with the setnext() and setprev() funcs.
- * They can be accessed using next() and prev().
+ * members are private and must be set with the setnext and prev =) funcs.
+ * They can be accessed using next and prev.
  */
-class ll_node {
-private:
-    ll_node* n = nullptr;
-    ll_node* p = nullptr;
-
-public:
+struct ll_node {
+    ll_node* next = nullptr;
+    ll_node* prev = nullptr;
     std::string data;
-    ll_node* next();
-    void setnext(ll_node*);
-    ll_node* prev();
-    void setprev(ll_node*);
 };
-ll_node* ll_node::prev() {
-    return this->p;
-}
-void ll_node::setprev(ll_node* prev) {
-    this->p = prev;
-}
-ll_node* ll_node::next() {
-    return this->n;
-}
-void ll_node::setnext(ll_node* next) {
-    this->n = next;
-}
+
 void delete_nodes(ll_node* n) {
     if (n == nullptr)
         return;
-    ll_node* n2 = n->next();
+    ll_node* n2 = n->next;
     while (n2 != nullptr) {
         free(n);
         n = n2;
-        n2 = n2->next();
+        n2 = n2->next;
     }
     free(n);
 }
@@ -65,12 +44,15 @@ void delete_nodes(ll_node* n) {
  * and track size. Each list has several helper functions (see declarations)
  * for more info.
  */
-class llist {
-public:
+struct wordle_ll {
     ll_node* head = nullptr;
     ll_node* tail = nullptr;
     int size = 0;
+    int WORD_SIZE = 5;
 
+    void setYear();
+    bool read_in_unsorted_words();
+    bool read_in_sorted_words();
     void init();
     void append(std::string*);
     void remove_head();
@@ -90,16 +72,57 @@ public:
     void exclude(std::string*);
     void exclude(char, int);
     void exclude_letters(std::string);
-    llist* first_filter_results(std::string) const;
+    wordle_ll* first_filter_results(std::string) const;
     void rm_duplicates();
     void info();
 };
-void llist::init() {
+void wordle_ll::setYear() {
+    std::cout << "How many letters are you playing with?  : ";
+    std::cin >> this->WORD_SIZE; std::cin.clear(); std::cin.ignore();
+    if (!read_in_sorted_words()) {
+        std::cout << "Reading dictionary file failed!\nExiting..." << std::endl;
+        exit(1);
+    }
+}
+bool wordle_ll::read_in_unsorted_words() {
+    std::string str;
+    std::ifstream file;
+    file.open("words.txt");
+    if (!file.is_open()) {
+        return false;
+    }
+    while (getline(file, str)) {
+        insert(&str);
+    }
+    return true;
+}
+bool wordle_ll::read_in_sorted_words() {
+    std::string str;
+    //words->init();
+    std::ifstream file;
+    std::stringstream filename;
+    filename << "Dictionaries/" << WORD_SIZE << ".txt";
+    file.open(filename.str());
+    if (!file.is_open()) {
+        std::cout << "Working directory:\n";
+        system("echo %cd%");
+        std::cout << "\nFilename: " << filename.str() << std::endl;
+        return false;
+    }
+    while (getline(file, str)) {
+        //words->append(&str);
+        append(&str);
+    }
+    return true;
+}
+void wordle_ll::init() {
     this->head = nullptr;
     this->tail = nullptr;
     this->size = 0;
+
+    this->setYear();
 }
-void llist::append(std::string* s) {
+void wordle_ll::append(std::string* s) {
     auto* n = new ll_node;
     if(this->head == nullptr) {
         this->head = n;
@@ -107,26 +130,26 @@ void llist::append(std::string* s) {
         this->head->data = *s;
     }
     else {
-        this->tail->setnext(n);
-        n->setprev(this->tail);
+        this->tail->next =n;
+        n->prev =this->tail;
         this->tail = n;
     }
     n->data = *s;
     this->size++;
 }
-void llist::remove_head() {
+void wordle_ll::remove_head() {
     ll_node* ptr = this->head;
     if (this->head == nullptr)
         return;
-    this->head = this->head->next();
+    this->head = this->head->next;
     if (this->head != nullptr)
-        this->head->setprev(nullptr);
+        this->head->prev =nullptr;
     else
         this->tail = nullptr;
     delete(ptr);
     this->size--;
 }
-void llist::insert(std::string* str) {
+void wordle_ll::insert(std::string* str) {
     ll_node* ptr = this->head;
     if (this->head == nullptr) {
         append(str);
@@ -137,13 +160,13 @@ void llist::insert(std::string* str) {
         if (*str < ptr->data){  // prepend if necessary
             newnode->data = *str;
             this->head = newnode;
-            newnode->setnext(ptr);
-            ptr->setprev(newnode);
+            newnode->next =ptr;
+            ptr->prev =newnode;
             return;
         }
         // get to proper location
-        while(ptr->data < *str && ptr->next() != nullptr) {
-            ptr = ptr->next();
+        while(ptr->data < *str && ptr->next != nullptr) {
+            ptr = ptr->next;
         }
         if(ptr->data == *str) {  // disregard if already exists
             delete(newnode);
@@ -151,44 +174,44 @@ void llist::insert(std::string* str) {
         }
         else {      // insert after ptr
             newnode->data = *str;
-            newnode->setnext(ptr->next());
-            newnode->setprev(ptr);
-            if(ptr->next() == nullptr) {
+            newnode->next =ptr->next;
+            newnode->prev =ptr;
+            if(ptr->next == nullptr) {
                 this->tail = newnode;
             }
             else {
-                ptr->next()->setprev(newnode);
+                ptr->next->prev =newnode;
             }
-            ptr->setnext(newnode);
+            ptr->next =newnode;
         }
     }
 }
-ll_node* llist::remove(ll_node* d) {
+ll_node* wordle_ll::remove(ll_node* d) {
     ll_node* retval;
     if(d == this->head) {  // case for deleting head
         remove_head();
         return this->head;
     }
-    d->prev()->setnext(d->next());
-    if (d->next() != nullptr) {  // case for deleting tail
-        d->next()->setprev(d->prev());
-        retval = d->next();
+    d->prev->next =d->next;
+    if (d->next != nullptr) {  // case for deleting tail
+        d->next->prev = d->prev;
+        retval = d->next;
         delete(d);
         this->size--;
         return retval;
     }
     else {  // case for deleting in middle of list
-        this->tail = d->prev();
+        this->tail = d->prev;
         delete(d);
         this->size--;
         return nullptr;
     }
 }
-void llist::position_exclude(std::string* s) {
+void wordle_ll::position_exclude(std::string* s) {
     ll_node* ptr;
     std::string str_to_pass = "";
     bool b = false;
-    for(int c=0; c < WORD_SIZE; c++) {
+    for(int c=0; c < this->WORD_SIZE; c++) {
         ptr = this->head;
         b = false;
         while(ptr != nullptr) {
@@ -200,7 +223,7 @@ void llist::position_exclude(std::string* s) {
                 ptr = this->remove(ptr);  // ptr gets incremented when removing from list
             }
             else
-                ptr = ptr->next();
+                ptr = ptr->next;
         }
         if(!b) {
             // Ensure (*s)[c] is included if not a '*'
@@ -209,31 +232,31 @@ void llist::position_exclude(std::string* s) {
         }
     }
 }
-void llist::destroy() {
+void wordle_ll::destroy() {
     delete_nodes(this->head);
 }
-void llist::print() const {
+void wordle_ll::print() const {
     ll_node* ptr = this->head;
     std::cout << "WORDS IN LIST [" << this->size << "]:\n";
     while(ptr != nullptr) {
         std::cout << " - " << ptr->data << std::endl;
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
     std::cout << "Total Size: " << this->size << std::endl;
 }
-void llist::printhistory() const {
+void wordle_ll::printhistory() const {
     ll_node* ptr = this->head;
     std::cout << "Filter History:\n";
     while(ptr != nullptr) {
         std::cout << "   " << ptr->data << std::endl;
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
     std::cout << "End of History.\n";
 }
-void llist::parse(std::string input) {
+void wordle_ll::parse(std::string input) {
     char c;
     // loop to determine if any correct value & position (those narrow list faster than value only)
-    for (int i = 0; i < WORD_SIZE; i++) {
+    for (int i = 0; i < this->WORD_SIZE; i++) {
         c = input[i];
         if (c == '_') {
             continue;
@@ -246,7 +269,7 @@ void llist::parse(std::string input) {
         }
     }
 }
-void llist::include_correct(char c, int pos) {
+void wordle_ll::include_correct(char c, int pos) {
     ll_node* ptr = this->head;
     while (ptr != nullptr) {
         if (ptr->data[pos] != c) {
@@ -255,16 +278,16 @@ void llist::include_correct(char c, int pos) {
                 break;
             continue;
         }
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
 }
-void llist::include(char c, int pos) {
+void wordle_ll::include(char c, int pos) {
     exclude(c, pos);   // cannot be in position, otherwise would be correct
     ll_node* ptr = this->head;
     bool has_c;
     include_loop: while (ptr != nullptr) {
         has_c = false;
-        for (int i = 0; i < WORD_SIZE && !has_c; i++) {
+        for (int i = 0; i < this->WORD_SIZE && !has_c; i++) {
             if (ptr->data[i] == c) {
                 has_c = true;
                 break;
@@ -277,11 +300,11 @@ void llist::include(char c, int pos) {
                 break;
             goto include_loop;
         }
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
     return;
 }
-void llist::exclude(char c, int pos) {
+void wordle_ll::exclude(char c, int pos) {
     ll_node* ptr = this->head;
     while (ptr != nullptr) {
         if (ptr->data[pos] == c) {
@@ -290,42 +313,42 @@ void llist::exclude(char c, int pos) {
                 break;
             continue;
         }
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
     return;
 }
-void llist::filter_results(std::string input) {
+void wordle_ll::filter_results(std::string input) {
     ll_node* ptr = this->head;
-    for(int i=0; i<WORD_SIZE; i++) {
+    for(int i=0; i<this->WORD_SIZE; i++) {
         if(input[i] != '_') {
             while(ptr != nullptr) {
                 if(input[i] != ptr->data[i]) {
                     ptr = this->remove(ptr);  // increments pointer when removing
                 }
                 else{
-                    ptr = ptr->next();
+                    ptr = ptr->next;
                 }
             }
             ptr = this->head;  // reset pointer to beginning of subset
         }
     }
 }
-llist* llist::first_filter_results(std::string input) const {
-    auto* s = new llist;
+wordle_ll* wordle_ll::first_filter_results(std::string input) const {
+    auto* s = new wordle_ll;
     ll_node* ptr = this->head;
-    for(int i=0; i<WORD_SIZE; i++) {
+    for(int i=0; i<this->WORD_SIZE; i++) {
         if(input[i] != '_') {
             while(ptr != nullptr) {
                 if(input[i] == ptr->data[i]) {
                     s->append(&ptr->data);
                 }
-                ptr = ptr->next();
+                ptr = ptr->next;
             }
         }
     }
     return s;
 }
-ll_node* llist::search(std::string* str) const {
+ll_node* wordle_ll::search(std::string* str) const {
     /**
      * Note: this function can be used for implementing different
      * kinds of search algorithms, but for most applications and
@@ -333,15 +356,15 @@ ll_node* llist::search(std::string* str) const {
      * search algorithm is sufficiently fast and poses no averse
      * wait times for the user.
      */
-    return llist::linsearch(str, this->head);
+    return wordle_ll::linsearch(str, this->head);
 }
-ll_node* llist::linsearch(std::string* needle, ll_node* haystack) {
+ll_node* wordle_ll::linsearch(std::string* needle, ll_node* haystack) {
     if ((*needle).empty() || haystack == nullptr) {
         return nullptr;
     }
     // Traverse to get to desired location
-    while(haystack->next() != nullptr && 0 < (*needle).compare(haystack->data)) {
-        haystack = haystack->next();
+    while(haystack->next != nullptr && 0 < (*needle).compare(haystack->data)) {
+        haystack = haystack->next;
     }
     if (*needle == haystack->data) {
         return haystack;
@@ -350,9 +373,9 @@ ll_node* llist::linsearch(std::string* needle, ll_node* haystack) {
         return nullptr;
     }
 }
-void llist::exclude(std::string* s) {
+void wordle_ll::exclude(std::string* s) {
     ll_node* ptr = this->head;
-    for(int c=1; c < WORD_SIZE+1; c++) {
+    for(int c=1; c < this->WORD_SIZE+1; c++) {
         ptr = this->head;
         while(ptr != nullptr) {
             if ((*s)[c] == ptr->data[0] || (*s)[c] == ptr->data[1] ||
@@ -361,37 +384,17 @@ void llist::exclude(std::string* s) {
                 ptr = this->remove(ptr);  // ptr gets incremented when removing from list
             }
             else
-                ptr = ptr->next();
+                ptr = ptr->next;
         }
     }
 }
-//void llist::exclude_letters(std::string input) {   // this is horrifically slow, unsure how to speed it up but it works I guess...
-//    ll_node* ptr = this->head;
-//    bool goToNextWord;
-//    int letter = 1;
-//nextCharInInput: 
-//    for (int i = 1; i < input.length(); i++) {   // for each letter in input
-//        ptr = this->head;
-//        while (ptr != nullptr) {                                    // loop through every word in search list
-//            for (int letter = 0; letter < WORD_SIZE; letter++) {    // for each letter in word
-//                if (ptr->data[letter] == input[i]) {                // if it matches the character from input
-//                    ptr = this->remove(ptr);                        // remove that word from search list
-//                    if (ptr == nullptr)   // reach end of llist
-//                        goto nextCharInInput;
-//                    break;
-//                }
-//            }
-//            ptr = ptr->next();
-//        }
-//    }
-//}
-void llist::exclude_letters(std::string s) {
+void wordle_ll::exclude_letters(std::string s) {
     ll_node* ptr;
     bool removed = false;
     for (int c = 1; c < s.length(); c++) {
         ptr = this->head;
         while (ptr != nullptr) {
-            for (int l = 0; l < WORD_SIZE; l++) {
+            for (int l = 0; l < this->WORD_SIZE; l++) {
                 if (s[c] == ptr->data[l]) {
                     ptr = this->remove(ptr);
                     removed = true;
@@ -402,12 +405,12 @@ void llist::exclude_letters(std::string s) {
                 removed = false;
             }
             else {
-                ptr = ptr->next();
+                ptr = ptr->next;
             }
         }
     }
 }
-void llist::include(std::string* s, int length) {
+void wordle_ll::include(std::string* s, int length) {
     ll_node* ptr;
     for(int c=0; c < length; c++) {
         ptr = this->head;
@@ -415,14 +418,14 @@ void llist::include(std::string* s, int length) {
             if ((*s)[c] == ptr->data[0] || (*s)[c] == ptr->data[1] ||
                 (*s)[c] == ptr->data[2] || (*s)[c] == ptr->data[3] ||
                 (*s)[c] == ptr->data[4]) {
-                ptr = ptr->next();
+                ptr = ptr->next;
             }
             else
                 ptr = this->remove(ptr);  // ptr gets incremented when removing from list
         }
     }
 }
-void llist::rm_duplicates() {
+void wordle_ll::rm_duplicates() {
     ll_node* ptr = this->head;
 
     // Make empty array of zeros
@@ -433,7 +436,7 @@ void llist::rm_duplicates() {
 
     // Get Letter Occurrence: Increment each index of the array correlating to the character being compared
     loop: while(ptr != nullptr) {
-        for(int j=0; j<WORD_SIZE; j++) {
+        for(int j=0; j<this->WORD_SIZE; j++) {
             a[ptr->data[j] - 97]++;
             if (a[ptr->data[j]-97] > 1) {
                 ptr = this->remove(ptr);
@@ -443,10 +446,10 @@ void llist::rm_duplicates() {
                 goto loop;
             }
         }
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
 }
-void llist::info() {
+void wordle_ll::info() {
     ll_node* ptr = this->head;
 
     // Make empty array of zeros
@@ -457,10 +460,10 @@ void llist::info() {
 
     // Get Letter Occurrence: Increment each index of the array correlating to the character being compared
     while(ptr != nullptr) {
-        for(int j=0; j<WORD_SIZE; j++) {
+        for(int j=0; j<this->WORD_SIZE; j++) {
             num_occur[ptr->data[j] - 97]++;
         }
-        ptr = ptr->next();
+        ptr = ptr->next;
     }
 
     // Get order of most to least
@@ -501,4 +504,4 @@ void llist::info() {
     }
 }
 
-#endif //INC_5_LETTER_WORDLE_LINKED_LIST_H
+#endif //INC_WORDLE_LINKED_LIST_H
