@@ -7,27 +7,26 @@
 
 int main() {
     wordle_ll search_list;
+    search_list.init();
     std::string input;
     bool loop = true;
 
-    search_list.init();
     while(loop) {
         system("CLS");
         std::cout << "WORDLE SOLVER:\n";
         std::cout << "\nEnter a search string or one of the options below:\n";
         std::cout << "\tP : prints current searchlist (everything that meets criteria)\n";
-        std::cout << "\tH : display help for using search strings\n";
         std::cout << "\tS : display summary of searchlist (number items)\n";
+        std::cout << "\tD : perform detailed analytics on the current searchlist\n";
         std::cout << "\tN : change number of letters for this game\n";
         std::cout << "\tC : resets current search criteria\n";
         std::cout << "\tQ : quits this application\n";
+        std::cout << "\tH : display help for using search strings\n";
+        std::cout << "\tOr you can enter a search string directly:\n";
         std::cout << "\n>> ";
         std::getline(std::cin, input);
         if(input.length() == 1) {
             switch (toupper(input[0])) {
-                case 'Q':
-                    loop = false;
-                    break;
                 case 'P':
                     system("CLS");
                     std::cout << "WORDLE SOLVER:\n\n";
@@ -35,17 +34,12 @@ int main() {
                     std::cout << "\nPress enter to continue...";
                     std::getline(std::cin, input);
                     break;
-                case 'H':
-                    std::cout << "\n\t__s_D   :  lowercase letters are correct but wrong place, uppercase are correct and in correct place\n";
-                    std::cout << "\t.itna   :  a period before letters will exclude words containing those letters\n";
-                    std::cout << "\t#posed  :  guess if a word meets current criteria (displays success/failure)\n";
-                    std::cout << "\nPress enter to continue...";
-                    std::getline(std::cin, input);
-                    break;
+                
                 case 'S':
                     search_list.info();
-                    std::cout << "\nPress enter to continue...";
-                    std::getline(std::cin, input);
+                    break;
+                case 'D':
+                    search_list.analyze();
                     break;
                 case 'N':
                     search_list.setYear();
@@ -58,6 +52,16 @@ int main() {
                         std::getline(std::cin, input);
                         return 1;
                     }
+                    break;
+                case 'Q':
+                    loop = false;
+                    break;
+                case 'H':
+                    std::cout << "\n\t__s_D   :  lowercase letters are correct but wrong place, uppercase are correct and in correct place\n";
+                    std::cout << "\t.itna   :  a period before letters will exclude words containing those letters\n";
+                    std::cout << "\t#posed  :  guess if a word meets current criteria (displays success/failure)\n";
+                    std::cout << "\nPress enter to continue...";
+                    std::getline(std::cin, input);
                     break;
                 default:
                     std::cout << "\nERROR: Invalid input given  :  " << input << "\n";

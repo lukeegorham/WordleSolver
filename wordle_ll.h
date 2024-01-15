@@ -39,6 +39,7 @@ void delete_nodes(ll_node* n) {
     free(n);
 }
 
+
 /**
  * @brief Main linked list for storing words. Lists are double-linked
  * and track size. Each list has several helper functions (see declarations)
@@ -66,6 +67,7 @@ struct wordle_ll {
     void printhistory() const;
     void filter_results(std::string);
     void parse(std::string);
+    void analyze();
     void include(std::string*, int);
     void include(char, int);
     void include_correct(char, int);
@@ -268,6 +270,56 @@ void wordle_ll::parse(std::string input) {
             this->include_correct(input[i]+32, i);   // use tolower because dictionary is all in lowercase
         }
     }
+}
+void wordle_ll::analyze() {
+    // Initialize Variables
+    ll_node* ptr;
+    int num_in_word;
+    int with_without_total[3][ALPHABET_SIZE];
+    for (int i = 0; i < ALPHABET_SIZE; i++) {   // will store number of words WITH each letter
+        with_without_total[0][i] = 0;
+    }
+    for (int i = 0; i < ALPHABET_SIZE; i++) {   // will store number of words WITHOUT each letter
+        with_without_total[1][i] = 0;
+    }
+    for (int i = 0; i < ALPHABET_SIZE; i++) {   // will store the TOTAL number of each letter
+        with_without_total[2][i] = 0;
+    }
+
+    // Loop through, counting words with and without the letter
+    for (int i = 0; i < ALPHABET_SIZE; i++) {               // loops through each letter of the alphabet
+        ptr = this->head;
+        num_in_word = 0;
+        while (ptr != nullptr) {                            // loops through each word in the dictionary
+            for (int j = 0; j < this->WORD_SIZE; j++) {     // loops through each letter in each word
+                if (ptr->data[j] == i + 97) {
+                    num_in_word += 1;
+                }
+            }
+            if (num_in_word != 0) {
+                with_without_total[2][i] += num_in_word;
+                with_without_total[0][i] += 1;
+            }
+            else {
+                with_without_total[1][i] += 1;
+            }
+            ptr = ptr->next;
+        }
+    }
+
+    // Display letters, how many words with, without, and total number of occurrences
+    std::cout << "\t" << "LETTER:" << std::right << std::setw(6) << "WITH" << std::setw(6) << "W/O" << std::setw(6) << "TOTAL\n";
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        std::cout << std::left << "\t" << std::setw(6) << (char)(i + 65) << ":" << std::right
+            << std::setw(6) << with_without_total[0][i] << "   "
+            << std::setw(6) << with_without_total[1][i] << "   "
+            << std::setw(6) << with_without_total[2][i] << "\n";
+    }
+
+    // Freeze Displaying Info
+    std::string input;
+    std::cout << "\nPress enter to continue...";
+    std::getline(std::cin, input);
 }
 void wordle_ll::include_correct(char c, int pos) {
     ll_node* ptr = this->head;
@@ -502,6 +554,11 @@ void wordle_ll::info() {
         std::cout << "  " << char(k+97) << " : " << std::setw(10) << std::left << num_occur[k] 
                 << char(h_loc+97) <<  " : " << num_occur[h_loc] << std::endl;
     }
+
+    // Freeze Displaying Info
+    std::string input;
+    std::cout << "\nPress enter to continue...";
+    std::getline(std::cin, input);
 }
 
 #endif //INC_WORDLE_LINKED_LIST_H

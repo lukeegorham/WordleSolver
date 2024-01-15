@@ -126,7 +126,6 @@ void list::clear() {
 	this->tail = nullptr;
 }
 
-
 void recurseDeleteList(node* n) {
 	if (n->next == nullptr)
 		return;
