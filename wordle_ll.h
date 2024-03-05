@@ -1,9 +1,3 @@
-/***
- * Project :  Wordle Helper
- * Author  :  Luke Gorham
- * Date    :  21 May 2022
- */
-
 #ifndef INC_WORDLE_LINKED_LIST_H
 #define INC_WORDLE_LINKED_LIST_H
 
@@ -132,8 +126,8 @@ void wordle_ll::append(std::string* s) {
         this->head->data = *s;
     }
     else {
-        this->tail->next =n;
-        n->prev =this->tail;
+        this->tail->next = n;
+        n->prev = this->tail;
         this->tail = n;
     }
     n->data = *s;
@@ -145,7 +139,7 @@ void wordle_ll::remove_head() {
         return;
     this->head = this->head->next;
     if (this->head != nullptr)
-        this->head->prev =nullptr;
+        this->head->prev = nullptr;
     else
         this->tail = nullptr;
     delete(ptr);
@@ -162,8 +156,8 @@ void wordle_ll::insert(std::string* str) {
         if (*str < ptr->data){  // prepend if necessary
             newnode->data = *str;
             this->head = newnode;
-            newnode->next =ptr;
-            ptr->prev =newnode;
+            newnode->next = ptr;
+            ptr->prev = newnode;
             return;
         }
         // get to proper location
@@ -176,15 +170,15 @@ void wordle_ll::insert(std::string* str) {
         }
         else {      // insert after ptr
             newnode->data = *str;
-            newnode->next =ptr->next;
-            newnode->prev =ptr;
+            newnode->next = ptr->next;
+            newnode->prev = ptr;
             if(ptr->next == nullptr) {
                 this->tail = newnode;
             }
             else {
-                ptr->next->prev =newnode;
+                ptr->next->prev = newnode;
             }
-            ptr->next =newnode;
+            ptr->next = newnode;
         }
     }
 }
@@ -443,7 +437,7 @@ void wordle_ll::exclude(std::string* s) {
 void wordle_ll::exclude_letters(std::string s) {
     ll_node* ptr;
     bool removed = false;
-    for (int c = 1; c < s.length(); c++) {
+    for (int c = 1; c < (int)s.length(); c++) {
         ptr = this->head;
         while (ptr != nullptr) {
             for (int l = 0; l < this->WORD_SIZE; l++) {
@@ -519,46 +513,94 @@ void wordle_ll::info() {
     }
 
     // Get order of most to least
-    list maxes;         // stores indexes of num_occur in order of max occurrences (sorted list of maxes)
-    list conflicts;     // stores indexes which contain duplicate occurrence values
-    int value;
-    int max = -1;
-    int prevmax = INT_MAX;
-    int conflict = ALPHABET_SIZE;
-    int max_loc = 0;
+    list_2D fm;
+    list_2D maxes;     // stores index in num_occur of the index of most frequently occurring to leas frequently occurring letter
+    node* n_ptr;
+    node* max_loc;
+    int max_prev;
+    int counter;
     for (int i = 0; i < ALPHABET_SIZE; i++) {
-        max = -1;
-        for (int j = 0; j < ALPHABET_SIZE; j++) {   // loop through num_occur finding maxes and conflicts
-            if (num_occur[j] < prevmax && num_occur[j] > max) {
-                conflicts.clear();  // clear conflicts
-                max = num_occur[j]; // set max
-                max_loc = j;        // set max location
-                conflicts.push(j);  // add to conflicts
+        fm.push(num_occur[i]);
+    }
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        max_loc = nullptr;
+        n_ptr = fm.head;
+        counter = 0;
+        max_prev = 0;
+        // Get max location
+        while (n_ptr != nullptr) {
+            if (n_ptr->data >= max_prev) {
+                max_loc = n_ptr;
+                max_prev = n_ptr->data;
             }
-            else if (num_occur[j] == max) {
-                conflicts.push(j);
-            }
+            counter++;
+            n_ptr = n_ptr->next;
         }
-        maxes.push(conflicts.pop());
-        while (conflicts.size != 0) {       // Only loops if more than 1 conflict found
-            maxes.push(conflicts.pop());
-            i--;
+        // Remove max from fm list and put in to list
+        if (max_loc == nullptr) {
+            std::cout << "ERROR: Maximum occurrence count not found in \"fm\" list!\n";
         }
-        prevmax = max;
+        else {
+            maxes.prep(fm.remove(max_loc));
+        }
     }
 
     // Print Info
+    int h_loc;
     std::cout << "NUMBER OF WORDS : " << this->size << std::endl;
-    for(int k=0; k<ALPHABET_SIZE; k++) {
-        int h_loc = maxes.pop();
-        std::cout << "  " << char(k+97) << " : " << std::setw(10) << std::left << num_occur[k] 
-                << char(h_loc+97) <<  " : " << num_occur[h_loc] << std::endl;
+    for (int k = 0; k < ALPHABET_SIZE; k++) {
+        h_loc = maxes.pop();
+        std::cout << "  " << char(k + 97) << " : " << std::setw(10) << std::left << num_occur[k]
+            << char(h_loc + 97) << " : " << num_occur[h_loc] << std::endl;
     }
 
     // Freeze Displaying Info
     std::string input;
     std::cout << "\nPress enter to continue...";
     std::getline(std::cin, input);
+
+
+
+    //list maxes;         // stores indexes of num_occur in order of max occurrences (sorted list of maxes)
+    //list conflicts;     // stores indexes which contain duplicate occurrence values
+    //int max;
+    //int prevmax = INT_MAX;
+    //int conflict = ALPHABET_SIZE;
+    //int max_loc = 0;
+    //for (int i = 0; i < ALPHABET_SIZE; i++) {
+    //    max = -1;
+    //    for (int j = 0; j < ALPHABET_SIZE; j++) {   // loop through num_occur finding maxes and conflicts
+    //        if (num_occur[j] >= prevmax) { // num_occur[j] > max) {
+    //            conflicts.clear();  // clear conflicts
+    //            max = num_occur[j]; // set max
+    //            max_loc = j;        // set max location
+    //            conflicts.push(j);  // add to conflicts
+    //        }
+    //        else if (num_occur[j] == max) {
+    //            conflicts.push(j);
+    //        }
+    //    }
+    //    maxes.push(conflicts.pop());
+    //    while (conflicts.size != 0) {       // Only loops if more than 1 conflict found
+    //        maxes.push(conflicts.pop());
+    //        i--;
+    //    }
+    //    prevmax = max;
+    //}
+
+    //// Print Info
+    //int h_loc;
+    //std::cout << "NUMBER OF WORDS : " << this->size << std::endl;
+    //for(int k=0; k<ALPHABET_SIZE; k++) {
+    //    h_loc = maxes.pop();
+    //    std::cout << "  " << char(k+97) << " : " << std::setw(10) << std::left << num_occur[k] 
+    //            << char(h_loc+97) <<  " : " << num_occur[h_loc] << std::endl;
+    //}
+
+    //// Freeze Displaying Info
+    //std::string input;
+    //std::cout << "\nPress enter to continue...";
+    //std::getline(std::cin, input);
 }
 
 #endif //INC_WORDLE_LINKED_LIST_H

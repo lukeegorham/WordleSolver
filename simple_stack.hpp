@@ -12,7 +12,14 @@ node::node(int i) {
 	this->next = nullptr;
 	this->prev = nullptr;
 }
-void recurseDeleteList(node* n);
+
+// Required Function to Delete List
+void recurseDeleteList(node* n) {
+	if (n->next == nullptr)
+		return;
+	recurseDeleteList(n->next);
+	free(n);
+}
 
 struct list {
 	node* head = nullptr;
@@ -28,16 +35,14 @@ struct list {
 	int pop();
 	int rme();
 	void clear();
-	//void insert(int loc, int data);
-	//int remove(int pos);
+	int remove(node* n);
 };
-list::~list() {
+list::~list() {				// Default Deconstructor
 	if (this->size != 0 && this->head != nullptr) {
 		recurseDeleteList(this->head);
 	}
 }
-// Enqueue = Add to end (aka append)
-void list::enq(int i) {
+void list::enq(int i) {		// Enqueue = Add to end (aka append)
 	node* new_node = (node*) new node(i);
 	if (this->size == 0) {
 		this->head = new_node;
@@ -51,21 +56,19 @@ void list::enq(int i) {
 		this->tail = new_node;
 	}
 }
-// Append = Add to end (same as enq())
-void list::app(int i) {
+void list::app(int i) {		// Append = Add to end (same as enq())
 	this->enq(i);
 }
-// Dequeue = Remove from front
-int list::deq() {
-	if (this->size == 0) {
+int list::deq() {			// Dequeue = Remove from front
+	if (this->size <= 0) {
 		return -1;
 	}
 	int n = this->head->data;
 	node* n_addr = this->head;
-	if (this->size == 1) {
+	if (this->size == 1 || this->head->next == nullptr) {
 		free(n_addr);
-		this->head == nullptr;
-		this->tail == nullptr;
+		this->head = nullptr;
+		this->tail = nullptr;
 		this->size = 0;
 		return n;
 	}
@@ -75,8 +78,7 @@ int list::deq() {
 	this->size--;
 	return n;
 }
-// Push = Add to front
-void list::push(int i) {
+void list::push(int i) {	// Push = Add to front
 	node* new_node = (node*) new node(i);
 	if (this->size == 0) {
 		this->tail = new_node;
@@ -88,16 +90,13 @@ void list::push(int i) {
 	this->head = new_node;
 	this->size++;
 }
-// Prepend = Add to front (same as push())
-void list::prep(int i) {
+void list::prep(int i) {	// Prepend = Add to front (same as push())
 	this->push(i);
 }
-// Pop = Remove from front (same as deq())
-int list::pop() {
+int list::pop() {			// Pop = Remove from front (same as deq())
 	return this->deq();
 }
-// Remove End = Remove from end (NOT same as pop())
-int list::rme() {
+int list::rme() {			// Remove End = Remove from end (NOT same as pop())
 	if (this->size == 0) {
 		return -1;
 	}
@@ -105,8 +104,8 @@ int list::rme() {
 	int n = n_addr->data;
 	if (this->size == 1) {
 		free(n_addr);
-		this->head == nullptr;
-		this->tail == nullptr;
+		this->head = nullptr;
+		this->tail = nullptr;
 		this->size = 0;
 		return n;
 	}
@@ -116,7 +115,6 @@ int list::rme() {
 	this->size--;
 	return n;
 }
-
 void list::clear() {
 	if (this->size != 0) {
 		recurseDeleteList(this->head);
@@ -125,10 +123,24 @@ void list::clear() {
 	this->head = nullptr;
 	this->tail = nullptr;
 }
-
-void recurseDeleteList(node* n) {
-	if (n->next == nullptr)
-		return;
-	recurseDeleteList(n->next);
-	free(n);
+int list::remove(node* n) {
+	int return_value;
+	if (this->size <= 0) {
+		std::cout << "ERROR: Called remove on empty list!\n";
+		return -1;
+	}
+	else if (n == this->head || n->prev == nullptr) {
+		return this->deq();
+	}
+	else if (n == this->tail || n->next == nullptr) {
+		return this->rme();
+	}
+	else if(this->size > 0) {
+		return_value = n->data;
+		n->prev->next = n->next;
+		n->next->prev = n->prev;
+		free(n);
+		this->size--;
+		return return_value;
+	}
 }

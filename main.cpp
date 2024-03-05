@@ -34,7 +34,6 @@ int main() {
                     std::cout << "\nPress enter to continue...";
                     std::getline(std::cin, input);
                     break;
-                
                 case 'S':
                     search_list.info();
                     break;
@@ -74,7 +73,7 @@ int main() {
         }
         else if (input.length() == 6 && input[0] == '#') {
             std::string guess = "     ";
-            for (int i = 0; i < search_list.WORD_SIZE && i < input.length(); i++)
+            for (int i = 0; i < search_list.WORD_SIZE && i < (int)input.length(); i++)
                 guess.at(i) = input.at(i+1);   // remove first character (#) from string then search
             if (search_list.search(&guess) != nullptr)
                 std::cout << "SUCCESS: " << input << " found in search list!\n";
